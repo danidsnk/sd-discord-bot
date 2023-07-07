@@ -1,0 +1,12 @@
+{
+    "server_white_list": [
+        // your server id
+    ],
+    "workers": [
+        {
+            "address": "127.0.0.1",
+            "port": 7860
+        }
+    ],
+    "use_paint_plus": false
+}
