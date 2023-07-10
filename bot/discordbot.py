@@ -30,9 +30,9 @@ class DiscordBot:
             await guild.leave()
 
     async def start(self):
-        token = os.getenv('DISCORD_TOKEN')
+        token = os.getenv('DISCORD_API_TOKEN')
         if token is None:
-            raise ValueError('DISCORD_TOKEN environment variable not set')
+            raise ValueError('DISCORD_API_TOKEN environment variable not set')
 
         ch = self.__command_handler
 
