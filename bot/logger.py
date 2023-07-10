@@ -23,6 +23,7 @@ LOGGING_CONFIG = {
             'filename': 'logs/infos.log',
             'mode': 'w',
             'formatter': 'verbose',
+            'encoding': 'utf-8',
         },
     },
     'loggers': {
