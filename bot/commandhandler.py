@@ -37,12 +37,12 @@ class DiscordCommandHandler(commands.Bot):
             await interaction.edit_original_response(
                 content=f'Generating: {prompt}')
 
-        async def on_hires_request(inter: discord.Interaction,
+        async def on_hires_request(interaction: discord.Interaction,
                                    offset: int):
             logger.debug('upscalse request from @%s (guild: %s)',
                          interaction.user.name,
                          interaction.guild_id)
-            await inter.response.send_message('In queue...')
+            await interaction.response.send_message('In queue...')
 
             gen_info = GenerationInfo(
                 prompt=prompt,
@@ -50,11 +50,11 @@ class DiscordCommandHandler(commands.Bot):
                 hires=True)
 
             async def on_start():
-                await inter.edit_original_response(
+                await interaction.edit_original_response(
                     content=f'Upscaling: {prompt}\nseed: {gen_info.seed}')
 
             async def on_finish(result):
-                await inter.edit_original_response(
+                await interaction.edit_original_response(
                     attachments=[discord.File(
                         fp=result,
                         filename=self.__generate_file_name(gen_info.seed))])
