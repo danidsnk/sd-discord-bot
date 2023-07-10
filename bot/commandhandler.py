@@ -15,8 +15,7 @@ logger = get_logger('bot')
 
 class DiscordCommandHandler(commands.Bot):
     def __init__(self, queue: Queue, use_paint_plus: bool):
-        intents = discord.Intents.all()
-        super().__init__(command_prefix='!', intents=intents)
+        super().__init__(command_prefix='!', intents=discord.Intents.default())
         self.__queue = queue
         self.__use_paint_plus = use_paint_plus
         if use_paint_plus:
