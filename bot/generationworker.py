@@ -56,10 +56,18 @@ class GenerationWorker:
     async def run(self):
         while True:
             task: GenerationTask = await self.__queue.get()
-            logger.debug(f'Worker: {self.__address} starting task: (seed: {task.generation_info.seed}, hires: {task.generation_info.hires}, prompt: "{task.generation_info.prompt}")')
+            logger.debug('Worker: %s starting task: (seed: %s, hires: %s, prompt: "%s")',
+                         self.__address,
+                         task.generation_info.seed,
+                         task.generation_info.hires,
+                         task.generation_info.prompt)
             await task.on_start()
             # TODO: error handling
             result = await self.__generate(task.generation_info)
-            logger.debug(f'Worker: {self.__address} complete task: (seed: {task.generation_info.seed}, hires: {task.generation_info.hires}, prompt: "{task.generation_info.prompt}")')
+            logger.debug('Worker: %s complete task: (seed: %s, hires: %s, prompt: "%s")',
+                         self.__address,
+                         task.generation_info.seed,
+                         task.generation_info.hires,
+                         task.generation_info.prompt)
             await task.on_finish(result)
             self.__queue.task_done()
