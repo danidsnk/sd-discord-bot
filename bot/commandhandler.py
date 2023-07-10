@@ -59,10 +59,15 @@ class DiscordCommandHandler(commands.Bot):
                         fp=result,
                         filename=self.__generate_file_name(gen_info.seed))])
 
+            async def on_error(_):
+                await interaction.edit_original_response(
+                    content=f'Upscaling failed')
+
             await self.__queue.put(GenerationTask(
                 generation_info=gen_info,
                 on_start=on_start,
-                on_finish=on_finish))
+                on_finish=on_finish,
+                on_error=on_error))
             logger.debug('Queued upscalse task: (seed: %s prompt: "%s")',
                          gen_info.seed,
                          gen_info.prompt)
@@ -74,10 +79,15 @@ class DiscordCommandHandler(commands.Bot):
                     filename=self.__generate_file_name(gen_info.seed))],
                 view=UpscaleButtons(interaction, on_hires_request))
 
+        async def on_error(_):
+            await interaction.edit_original_response(
+                content=f'Generating failed')
+
         await self.__queue.put(GenerationTask(
             generation_info=gen_info,
             on_start=on_start,
-            on_finish=on_finish))
+            on_finish=on_finish,
+            on_error=on_error))
         logger.debug('Queued grid task: (seed: %s prompt: "%s")',
                      gen_info.seed,
                      gen_info.prompt)
