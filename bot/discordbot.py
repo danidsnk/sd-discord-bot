@@ -4,6 +4,9 @@ from typing import List
 
 from .commandhandler import DiscordCommandHandler
 from .generationworker import GenerationWorker
+from .logger import get_logger
+
+logger = get_logger('bot')
 
 
 class DiscordBot:
@@ -40,7 +43,7 @@ class DiscordBot:
         async def on_ready():
             for guild in ch.guilds:
                 await self.__guild_filter(guild)
-            print(f'{ch.user} is now running!')
+            logger.info(f'{ch.user} is now running')
             await ch.tree.sync()
 
         @ch.event

@@ -4,6 +4,9 @@ from io import BytesIO
 from typing import Callable
 
 from .sdapi import ImageGenerator
+from .logger import get_logger
+
+logger = get_logger('bot')
 
 
 @dataclass
@@ -36,6 +39,7 @@ class GenerationWorker:
                  https: bool,
                  queue: Queue):
         self.__generator = ImageGenerator(address, port, https)
+        self.__address = address
         self.__queue = queue
 
     async def __generate(self, gen: GenerationInfo):
@@ -52,8 +56,10 @@ class GenerationWorker:
     async def run(self):
         while True:
             task: GenerationTask = await self.__queue.get()
+            logger.debug(f'Worker: {self.__address} starting task: (seed: {task.generation_info.seed}, hires: {task.generation_info.hires}, prompt: "{task.generation_info.prompt}")')
             await task.on_start()
             # TODO: error handling
             result = await self.__generate(task.generation_info)
+            logger.debug(f'Worker: {self.__address} complete task: (seed: {task.generation_info.seed}, hires: {task.generation_info.hires}, prompt: "{task.generation_info.prompt}")')
             await task.on_finish(result)
             self.__queue.task_done()

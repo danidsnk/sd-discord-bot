@@ -3,6 +3,10 @@ import backoff
 import openai
 from openai.error import OpenAIError, RateLimitError
 
+from .logger import get_logger
+
+logger = get_logger('bot')
+
 
 class ChatGpt:
     def __init__(self,
@@ -26,7 +30,7 @@ class ChatGpt:
         return response['choices'][0].message.content
 
     def __print_api_error(self, error: OpenAIError):
-        print(f'OpenAIError: {error}')
+        logger.error(f'OpenAIError: {error}')
 
     async def chat(self, prompt: str) -> str | None:
         self.__message_history.append({'role': 'user', 'content': prompt})
