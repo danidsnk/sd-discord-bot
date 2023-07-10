@@ -1,6 +1,7 @@
-import openai
-from openai.error import OpenAIError
 from aiohttp import ClientSession
+import backoff
+import openai
+from openai.error import OpenAIError, RateLimitError
 
 
 class ChatGpt:
@@ -14,6 +15,7 @@ class ChatGpt:
 
     # TODO: close session
 
+    @backoff.on_exception(backoff.expo, RateLimitError)
     def __gpt_request(self):
         return openai.ChatCompletion.acreate(
             model='gpt-3.5-turbo',
