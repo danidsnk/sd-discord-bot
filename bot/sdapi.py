@@ -10,8 +10,8 @@ class ImageGenerator:
                  use_https: bool = False,
                  save_images: bool = True):
         self.__api = WebUIApi(host=host,
-                                       port=port,
-                                       use_https=use_https)
+                              port=port,
+                              use_https=use_https)
         # self.__sampler = 'UniPC'
         # self.__steps = 10
         # self.__cfg_scale = 5
