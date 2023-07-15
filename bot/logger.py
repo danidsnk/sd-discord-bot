@@ -12,9 +12,9 @@ def setup_logger(debug: bool):
         'disabled_existing_loggers': False,
         'formatters': {
             'verbose': {
-                'format': '%(levelname)-10s - %(asctime)s - %(module)-15s : %(message)s'
+                'format': '%(levelname)-8s - %(asctime)s - %(name)-20s - %(module)-20s : %(message)s'
             },
-            'standard': {'format': '%(levelname)-10s - %(name)-15s : %(message)s'},
+            'standard': {'format': '%(levelname)-8s - %(module)-20s : %(message)s'},
         },
         'handlers': {
             'console': {
