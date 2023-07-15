@@ -5,7 +5,7 @@ import discord
 
 class UpscaleButtons(discord.ui.View):
     def __init__(self, message: discord.Interaction, action: Callable):
-        super().__init__(timeout=50)
+        super().__init__()
         self.__message = message
         self.__action = action
 
