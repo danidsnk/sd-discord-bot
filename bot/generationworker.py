@@ -21,18 +21,18 @@ class GenerationTask:
     def __init__(self,
                  generation_info: GenerationInfo,
                  on_start: Callable,
-                 on_finish: Callable,
+                 on_complete: Callable,
                  on_error: Callable):
         self.generation_info = generation_info
         self.__on_start = on_start
-        self.__on_finish = on_finish
+        self.__on_complete = on_complete
         self.__on_error = on_error
 
     async def on_start(self):
         await self.__on_start()
 
-    async def on_finish(self, result):
-        await self.__on_finish(result)
+    async def on_complete(self, result):
+        await self.__on_complete(result)
 
     async def on_error(self, error):
         await self.__on_error(error)
@@ -75,7 +75,7 @@ class GenerationWorker:
                              task.generation_info.seed,
                              task.generation_info.hires,
                              task.generation_info.prompt)
-                await task.on_finish(result)
+                await task.on_complete(result)
             except ClientError as err:
                 logger.error('Worker: %s failed task: (seed: %s, hires: %s, prompt: "%s") | Error: %s',
                              self.__address,

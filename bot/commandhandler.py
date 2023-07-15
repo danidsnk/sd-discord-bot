@@ -26,16 +26,29 @@ class DiscordCommandHandler(commands.Bot):
         timestamp = dt.now().strftime('%Y-%m-%d_%H-%M-%S')
         return f'{timestamp}_{seed}.png'
 
+    class __TaskActions:
+        def __init__(self, interaction):
+            self.interaction = interaction
+
+        def on_start(self, message):
+            async def on_start():
+                await self.interaction.edit_original_response(content=message)
+            return on_start
+
+        def on_complete(self, filename, **kwargs):
+            async def on_complete(result):
+                await self.interaction.edit_original_response(
+                    attachments=[discord.File(fp=result, filename=filename)],
+                    **kwargs)
+            return on_complete
+
+        def on_error(self, message):
+            async def on_error(_):
+                await self.interaction.edit_original_response(content=message)
+            return on_error
+
     async def __on_request(self, interaction: discord.Interaction, prompt: str):
         seed = random.randint(0, 10000000)
-        gen_info = GenerationInfo(
-            prompt=prompt,
-            seed=seed,
-            hires=False)
-
-        async def on_start():
-            await interaction.edit_original_response(
-                content=f'Generating: {prompt}')
 
         async def on_hires_request(interaction: discord.Interaction,
                                    offset: int):
@@ -48,45 +61,39 @@ class DiscordCommandHandler(commands.Bot):
                 prompt=prompt,
                 seed=seed+offset,
                 hires=True)
+            filename = self.__generate_file_name(gen_info.seed)
 
-            async def on_start():
-                await interaction.edit_original_response(
-                    content=f'Upscaling: {prompt}\nseed: {gen_info.seed}')
-
-            async def on_finish(result):
-                await interaction.edit_original_response(
-                    attachments=[discord.File(
-                        fp=result,
-                        filename=self.__generate_file_name(gen_info.seed))])
-
-            async def on_error(_):
-                await interaction.edit_original_response(
-                    content=f'Upscaling failed')
+            actions = self.__TaskActions(interaction)
+            on_start = actions.on_start(
+                f'Upscaling: {prompt}\nseed: {gen_info.seed}')
+            on_error = actions.on_error('Upscaling failed')
+            on_complete = actions.on_complete(filename)
 
             await self.__queue.put(GenerationTask(
                 generation_info=gen_info,
                 on_start=on_start,
-                on_finish=on_finish,
+                on_complete=on_complete,
                 on_error=on_error))
             logger.debug('Queued upscalse task: (seed: %s prompt: "%s")',
                          gen_info.seed,
                          gen_info.prompt)
 
-        async def on_finish(result):
-            await interaction.edit_original_response(
-                attachments=[discord.File(
-                    fp=result,
-                    filename=self.__generate_file_name(gen_info.seed))],
-                view=UpscaleButtons(interaction, on_hires_request))
+        gen_info = GenerationInfo(
+            prompt=prompt,
+            seed=seed,
+            hires=False)
+        filename = self.__generate_file_name(gen_info.seed)
 
-        async def on_error(_):
-            await interaction.edit_original_response(
-                content=f'Generating failed')
+        actions = self.__TaskActions(interaction)
+        on_start = actions.on_start(f'Generating: {prompt}')
+        on_error = actions.on_error('Generation failed')
+        on_complete = actions.on_complete(filename,
+            view=UpscaleButtons(interaction, on_hires_request))
 
         await self.__queue.put(GenerationTask(
             generation_info=gen_info,
             on_start=on_start,
-            on_finish=on_finish,
+            on_complete=on_complete,
             on_error=on_error))
         logger.debug('Queued grid task: (seed: %s prompt: "%s")',
                      gen_info.seed,
